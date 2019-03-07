@@ -30,19 +30,36 @@ namespace Cloud.Core
             Amount = amount;
         }
 
-        public void Pay(decimal amount)
+        public bool TryPay(decimal amount, out string errorMessage)
         {
             if (amount < Amount)
             {
-                throw new ArgumentException("insufficient amount", nameof(Amount));
+                errorMessage = "Insufficient payment amount";
+
+                return false;
             }
 
             Status = OrderStatus.Paid;
+
+            errorMessage = string.Empty;
+
+            return true;
         }
 
-        public void Cancel()
+        public bool TryCancel(out string errorMessage)
         {
+            if (Status != OrderStatus.New)
+            {
+                errorMessage = $"Can't cancel order of status {Status}";
+
+                return false;
+            }
+
             Status = OrderStatus.Cancelled;
+
+            errorMessage = string.Empty;
+
+            return true;
         }
     }
 }

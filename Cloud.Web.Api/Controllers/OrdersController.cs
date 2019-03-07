@@ -1,5 +1,4 @@
-﻿using System;
-using Cloud.Core;
+﻿using Cloud.Core;
 using Cloud.Infrastructure;
 using Cloud.Web.Api.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -79,13 +78,9 @@ namespace Cloud.Web.Api.Controllers
                 return NotFound();
             }
 
-            try
+            if (!order.TryPay(model.Amount.Value, out var errorMessage))
             {
-                order.Pay(model.Amount.Value);
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(exception.Message);
+                return BadRequest(errorMessage);
             }
 
             await _context.SaveChangesAsync();
@@ -110,7 +105,10 @@ namespace Cloud.Web.Api.Controllers
                 return NotFound();
             }
 
-            order.Cancel();
+            if (!order.TryCancel(out var errorMessage))
+            {
+                return BadRequest(errorMessage);
+            }
 
             await _context.SaveChangesAsync();
 
