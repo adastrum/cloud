@@ -12,6 +12,8 @@ namespace Cloud.Infrastructure
         {
         }
 
+        public DbSet<Order> Orders { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.Entity<Order>(order =>
