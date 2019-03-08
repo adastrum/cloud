@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Cloud.Core\Cloud.Core.csproj" />
+    <ProjectReference Include="..\Cloud.Messaging\Cloud.Messaging.csproj" />
   </ItemGroup>
 
 </Project>
