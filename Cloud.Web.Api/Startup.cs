@@ -1,4 +1,5 @@
 ﻿using Cloud.Infrastructure;
+using Cloud.Web.Api.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -22,6 +23,7 @@ namespace Cloud.Web.Api
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddDbContext<OrderDbContext>(options => options.UseInMemoryDatabase("InMemoryDatabase"));
+            services.AddHostedService<StorageQueueService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
