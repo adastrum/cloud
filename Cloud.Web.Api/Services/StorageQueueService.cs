@@ -1,7 +1,11 @@
 ﻿using Cloud.CommandStack.Commands;
 using Cloud.Messaging;
+using Cloud.Web.Api.Models;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Queue;
+using Newtonsoft.Json;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,15 +16,19 @@ namespace Cloud.Web.Api.Services
     {
         private readonly ILogger _logger;
         private readonly ICommandDispatcher _commandDispatcher;
+        private readonly CloudQueue _queue;
         private Timer _timer;
 
         public StorageQueueService(
             ILogger<StorageQueueService> logger,
-            ICommandDispatcher commandDispatcher
+            ICommandDispatcher commandDispatcher,
+            CloudStorageAccount cloudStorageAccount
         )
         {
             _logger = logger;
             _commandDispatcher = commandDispatcher;
+            var cloudQueueClient = cloudStorageAccount.CreateCloudQueueClient();
+            _queue = cloudQueueClient.GetQueueReference("commandqueue");
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -32,9 +40,21 @@ namespace Cloud.Web.Api.Services
 
         private void DeQueueMessage()
         {
-            _logger.LogInformation("de-queued message");
+            _queue.CreateIfNotExistsAsync().Wait();
+            var message = _queue.GetMessageAsync().Result;
+            var messageAsString = message?.AsString;
 
-            var command = new CreateOrderCommand("test", 42m);
+            if (string.IsNullOrWhiteSpace(messageAsString))
+            {
+                return;
+            }
+
+            _queue.DeleteMessageAsync(message).Wait();
+
+            _logger.LogInformation($"de-queued message {messageAsString}");
+
+            var createOrder = JsonConvert.DeserializeObject<CreateOrder>(messageAsString);
+            var command = new CreateOrderCommand(createOrder.Description, createOrder.Amount.Value);
 
             _commandDispatcher.Publish(command);
         }

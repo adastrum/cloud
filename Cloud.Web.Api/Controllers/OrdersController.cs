@@ -1,8 +1,10 @@
-﻿using Cloud.Core;
-using Cloud.Infrastructure;
+﻿using Cloud.Infrastructure;
 using Cloud.Web.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Queue;
+using Newtonsoft.Json;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,10 +15,16 @@ namespace Cloud.Web.Api.Controllers
     public class OrdersController : ControllerBase
     {
         private readonly OrderDbContext _context;
+        private readonly CloudQueue _queue;
 
-        public OrdersController(OrderDbContext context)
+        public OrdersController(
+            OrderDbContext context,
+            CloudStorageAccount cloudStorageAccount
+        )
         {
             _context = context;
+            var cloudQueueClient = cloudStorageAccount.CreateCloudQueueClient();
+            _queue = cloudQueueClient.GetQueueReference("commandqueue");
         }
 
         [HttpGet]
@@ -52,13 +60,13 @@ namespace Cloud.Web.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var order = new Order(model.Description, model.Amount.Value);
+            await _queue.CreateIfNotExistsAsync();
 
-            await _context.Orders.AddAsync(order);
+            var message = new CloudQueueMessage(JsonConvert.SerializeObject(model));
 
-            await _context.SaveChangesAsync();
+            await _queue.AddMessageAsync(message);
 
-            return CreatedAtAction(nameof(Create), order);
+            return CreatedAtAction(nameof(Create), model);
         }
 
         [HttpPost("{id}/pay")]
