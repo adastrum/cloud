@@ -13,13 +13,15 @@ namespace Cloud.Infrastructure
             _serviceProvider = serviceProvider;
         }
 
-        public void Publish<TCommand>(TCommand command)
-            where TCommand : ICommand
+        public void Publish(ICommand command)
         {
             using (var scope = _serviceProvider.CreateScope())
             {
-                var handler = (ICommandHandler<TCommand>)scope.ServiceProvider.GetService(typeof(ICommandHandler<TCommand>));
-                handler.Handle(command);
+                var commandType = command.GetType();
+                var serviceType = typeof(ICommandHandler<>).MakeGenericType(commandType);
+                var service = scope.ServiceProvider.GetService(serviceType);
+                var handleMethod = service.GetType().GetMethod("Handle");
+                handleMethod.Invoke(service, new object[] { command });
             }
         }
     }

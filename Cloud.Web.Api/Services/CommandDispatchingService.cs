@@ -1,10 +1,6 @@
-﻿using Cloud.CommandStack.Commands;
-using Cloud.Messaging;
-using Cloud.Web.Api.Models;
+﻿using Cloud.Messaging;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Queue;
 using Newtonsoft.Json;
 using System;
 using System.Threading;
@@ -12,23 +8,22 @@ using System.Threading.Tasks;
 
 namespace Cloud.Web.Api.Services
 {
-    public class StorageQueueService : IHostedService, IDisposable
+    public class CommandDispatchingService : IHostedService, IDisposable
     {
         private readonly ILogger _logger;
         private readonly ICommandDispatcher _commandDispatcher;
-        private readonly CloudQueue _queue;
+        private readonly ICommandQueueService _commandQueueService;
         private Timer _timer;
 
-        public StorageQueueService(
-            ILogger<StorageQueueService> logger,
+        public CommandDispatchingService(
+            ILogger<CommandDispatchingService> logger,
             ICommandDispatcher commandDispatcher,
-            CloudStorageAccount cloudStorageAccount
+            ICommandQueueService commandQueueService
         )
         {
             _logger = logger;
             _commandDispatcher = commandDispatcher;
-            var cloudQueueClient = cloudStorageAccount.CreateCloudQueueClient();
-            _queue = cloudQueueClient.GetQueueReference("commandqueue");
+            _commandQueueService = commandQueueService;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -40,21 +35,20 @@ namespace Cloud.Web.Api.Services
 
         private void DeQueueMessage()
         {
-            _queue.CreateIfNotExistsAsync().Wait();
-            var message = _queue.GetMessageAsync().Result;
-            var messageAsString = message?.AsString;
-
-            if (string.IsNullOrWhiteSpace(messageAsString))
+            var result = _commandQueueService.TryDeleteMessageAsync().Result;
+            if (!result.IsSuccess || string.IsNullOrWhiteSpace(result.Content))
             {
                 return;
             }
 
-            _queue.DeleteMessageAsync(message).Wait();
+            _logger.LogInformation($"de-queued message {result.Content}");
 
-            _logger.LogInformation($"de-queued message {messageAsString}");
-
-            var createOrder = JsonConvert.DeserializeObject<CreateOrder>(messageAsString);
-            var command = new CreateOrderCommand(createOrder.Description, createOrder.Amount.Value);
+            var command = JsonConvert.DeserializeObject<ICommand>(
+                result.Content,
+                new JsonSerializerSettings
+                {
+                    TypeNameHandling = TypeNameHandling.All
+                });
 
             _commandDispatcher.Publish(command);
         }

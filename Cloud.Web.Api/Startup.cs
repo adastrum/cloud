@@ -27,9 +27,10 @@ namespace Cloud.Web.Api
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddDbContext<OrderDbContext>(options => options.UseInMemoryDatabase("InMemoryDatabase"));
-            services.AddHostedService<StorageQueueService>();
+            services.AddHostedService<CommandDispatchingService>();
             services.AddTransient<ICommandDispatcher, InMemoryCommandDispatcher>();
             services.AddTransient<ICommandHandler<CreateOrderCommand>, CreateOrderCommandHandler>();
+            services.AddTransient<ICommandQueueService, CommandQueueService>();
 
             var connectionString = Configuration.GetValue<string>("CloudStorageAccountConnectionString");
             var storageAccount = CloudStorageAccount.Parse(connectionString);

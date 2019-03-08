@@ -1,11 +1,12 @@
-﻿using Cloud.Infrastructure;
+﻿using Cloud.CommandStack.Commands;
+using Cloud.Infrastructure;
+using Cloud.Messaging;
 using Cloud.Web.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Queue;
 using Newtonsoft.Json;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace Cloud.Web.Api.Controllers
@@ -15,16 +16,15 @@ namespace Cloud.Web.Api.Controllers
     public class OrdersController : ControllerBase
     {
         private readonly OrderDbContext _context;
-        private readonly CloudQueue _queue;
+        private readonly ICommandQueueService _commandQueueService;
 
         public OrdersController(
             OrderDbContext context,
-            CloudStorageAccount cloudStorageAccount
+            ICommandQueueService commandQueueService
         )
         {
             _context = context;
-            var cloudQueueClient = cloudStorageAccount.CreateCloudQueueClient();
-            _queue = cloudQueueClient.GetQueueReference("commandqueue");
+            _commandQueueService = commandQueueService;
         }
 
         [HttpGet]
@@ -60,13 +60,22 @@ namespace Cloud.Web.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            await _queue.CreateIfNotExistsAsync();
+            var command = new CreateOrderCommand(model.Description, model.Amount.Value);
 
-            var message = new CloudQueueMessage(JsonConvert.SerializeObject(model));
+            var message = JsonConvert.SerializeObject(
+                command,
+                new JsonSerializerSettings
+                {
+                    TypeNameHandling = TypeNameHandling.All
+                });
 
-            await _queue.AddMessageAsync(message);
+            var result = await _commandQueueService.TryAddMessageAsync(message);
+            if (!result.IsSuccess)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, result.ErrorMessage);
+            }
 
-            return CreatedAtAction(nameof(Create), model);
+            return Ok();
         }
 
         [HttpPost("{id}/pay")]
