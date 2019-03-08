@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using Cloud.CommandStack.Commands;
+using Cloud.Messaging;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
@@ -9,11 +11,16 @@ namespace Cloud.Web.Api.Services
     public class StorageQueueService : IHostedService, IDisposable
     {
         private readonly ILogger _logger;
+        private readonly ICommandDispatcher _commandDispatcher;
         private Timer _timer;
 
-        public StorageQueueService(ILogger<StorageQueueService> logger)
+        public StorageQueueService(
+            ILogger<StorageQueueService> logger,
+            ICommandDispatcher commandDispatcher
+        )
         {
             _logger = logger;
+            _commandDispatcher = commandDispatcher;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -26,6 +33,10 @@ namespace Cloud.Web.Api.Services
         private void DeQueueMessage()
         {
             _logger.LogInformation("de-queued message");
+
+            var command = new CreateOrderCommand("test", 42m);
+
+            _commandDispatcher.Publish(command);
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

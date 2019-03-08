@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Cloud.CommandStack\Cloud.CommandStack.csproj" />
     <ProjectReference Include="..\Cloud.Infrastructure\Cloud.Infrastructure.csproj" />
   </ItemGroup>
 

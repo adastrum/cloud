@@ -1,4 +1,7 @@
-﻿using Cloud.Infrastructure;
+﻿using Cloud.CommandStack.CommandHandlers;
+using Cloud.CommandStack.Commands;
+using Cloud.Infrastructure;
+using Cloud.Messaging;
 using Cloud.Web.Api.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -24,6 +27,8 @@ namespace Cloud.Web.Api
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddDbContext<OrderDbContext>(options => options.UseInMemoryDatabase("InMemoryDatabase"));
             services.AddHostedService<StorageQueueService>();
+            services.AddTransient<ICommandDispatcher, InMemoryCommandDispatcher>();
+            services.AddTransient<ICommandHandler<CreateOrderCommand>, CreateOrderCommandHandler>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

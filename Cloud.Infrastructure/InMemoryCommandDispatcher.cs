@@ -1,4 +1,5 @@
 ﻿using Cloud.Messaging;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 
 namespace Cloud.Infrastructure
@@ -15,8 +16,11 @@ namespace Cloud.Infrastructure
         public void Publish<TCommand>(TCommand command)
             where TCommand : ICommand
         {
-            var handler = (ICommandHandler<TCommand>)_serviceProvider.GetService(typeof(ICommandHandler<TCommand>));
-            handler.Handle(command);
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var handler = (ICommandHandler<TCommand>)scope.ServiceProvider.GetService(typeof(ICommandHandler<TCommand>));
+                handler.Handle(command);
+            }
         }
     }
 }
