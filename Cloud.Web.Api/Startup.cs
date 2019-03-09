@@ -1,8 +1,5 @@
-﻿using Cloud.CommandStack.CommandHandlers;
-using Cloud.CommandStack.Commands;
-using Cloud.Infrastructure;
+﻿using Cloud.Infrastructure;
 using Cloud.Messaging;
-using Cloud.Web.Api.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -26,10 +23,7 @@ namespace Cloud.Web.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-            services.AddDbContext<OrderDbContext>(options => options.UseInMemoryDatabase("InMemoryDatabase"));
-            services.AddHostedService<CommandDispatchingService>();
-            services.AddTransient<ICommandDispatcher, InMemoryCommandDispatcher>();
-            services.AddTransient<ICommandHandler<CreateOrderCommand>, CreateOrderCommandHandler>();
+            services.AddDbContext<OrderDbContext>(options => options.UseSqlServer(Configuration.GetValue<string>("SqlServerConnectionString")));
             services.AddTransient<ICommandQueueService, CommandQueueService>();
 
             var connectionString = Configuration.GetValue<string>("CloudStorageAccountConnectionString");

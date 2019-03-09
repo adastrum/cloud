@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace Cloud.Web.Api.Services
 {
+    [Obsolete("replaced by webjob")]
     public class CommandDispatchingService : IHostedService, IDisposable
     {
         private readonly ILogger _logger;
