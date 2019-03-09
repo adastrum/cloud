@@ -1,10 +1,10 @@
-﻿using Cloud.Messaging;
+﻿using System;
+using System.Threading.Tasks;
+using Cloud.Messaging;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Queue;
-using System;
-using System.Threading.Tasks;
 
-namespace Cloud.Web.Api.Services
+namespace Cloud.Infrastructure
 {
     public class CommandQueueService : ICommandQueueService
     {
