@@ -33,6 +33,38 @@ namespace Cloud.Core.Tests
             Assert.Equal(string.Empty, errorMessage);
         }
 
+        [Fact]
+        public void Should_not_pay_paid_order()
+        {
+            const string description = "test";
+            const decimal amount = 42m;
+            var order = new Order(description, amount);
+
+            order.TryPay(amount, out _);
+
+            var payResult = order.TryPay(amount, out var errorMessage);
+
+            Assert.Equal(OrderStatus.Paid, order.Status);
+            Assert.False(payResult);
+            Assert.Equal("Can't pay for order of status Paid", errorMessage);
+        }
+
+        [Fact]
+        public void Should_not_pay_cancelled_order()
+        {
+            const string description = "test";
+            const decimal amount = 42m;
+            var order = new Order(description, amount);
+
+            order.TryCancel(out _);
+
+            var payResult = order.TryPay(amount, out var errorMessage);
+
+            Assert.Equal(OrderStatus.Cancelled, order.Status);
+            Assert.False(payResult);
+            Assert.Equal("Can't pay for order of status Cancelled", errorMessage);
+        }
+
         [Theory]
         [InlineData(41.99)]
         [InlineData(41)]

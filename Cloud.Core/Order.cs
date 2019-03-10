@@ -32,6 +32,13 @@ namespace Cloud.Core
 
         public bool TryPay(decimal amount, out string errorMessage)
         {
+            if (Status != OrderStatus.New)
+            {
+                errorMessage = $"Can't pay for order of status {Status}";
+
+                return false;
+            }
+
             if (amount < Amount)
             {
                 errorMessage = "Insufficient payment amount";
