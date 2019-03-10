@@ -62,6 +62,37 @@ namespace Cloud.Web.Api.Controllers
 
             var command = new CreateOrderCommand(model.Description, model.Amount.Value);
 
+            return await QueueCommandAsync(command);
+        }
+
+        [HttpPost("{id}/pay")]
+        public async Task<IActionResult> Pay(string id, [FromBody] PayOrder model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var command = new PayOrderCommand(id, model.Amount.Value);
+
+            return await QueueCommandAsync(command);
+        }
+
+        [HttpPost("{id}/cancel")]
+        public async Task<IActionResult> Cancel(string id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var command = new CancelOrderCommand(id);
+
+            return await QueueCommandAsync(command);
+        }
+
+        private async Task<IActionResult> QueueCommandAsync(ICommand command)
+        {
             var message = JsonConvert.SerializeObject(
                 command,
                 new JsonSerializerSettings
@@ -74,60 +105,6 @@ namespace Cloud.Web.Api.Controllers
             {
                 return StatusCode((int)HttpStatusCode.InternalServerError, result.ErrorMessage);
             }
-
-            return Ok();
-        }
-
-        [HttpPost("{id}/pay")]
-        public async Task<IActionResult> Pay(string id, [FromBody] PayOrder model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var order = await _context.Orders
-                .AsQueryable()
-                .FirstOrDefaultAsync(x => x.Id == id);
-
-            if (order == null)
-            {
-                return NotFound();
-            }
-
-            if (!order.TryPay(model.Amount.Value, out var errorMessage))
-            {
-                return BadRequest(errorMessage);
-            }
-
-            await _context.SaveChangesAsync();
-
-            return Ok();
-        }
-
-        [HttpPost("{id}/cancel")]
-        public async Task<IActionResult> Cancel(string id, [FromBody] CancelOrder model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var order = await _context.Orders
-                .AsQueryable()
-                .FirstOrDefaultAsync(x => x.Id == id);
-
-            if (order == null)
-            {
-                return NotFound();
-            }
-
-            if (!order.TryCancel(out var errorMessage))
-            {
-                return BadRequest(errorMessage);
-            }
-
-            await _context.SaveChangesAsync();
 
             return Ok();
         }

@@ -34,6 +34,8 @@ namespace Cloud.WebJobs
                     services.AddDbContext<OrderDbContext>(options => options.UseSqlServer(hostContext.Configuration.GetValue<string>("SqlServerConnectionString")));
                     services.AddTransient<ICommandDispatcher, InMemoryCommandDispatcher>();
                     services.AddTransient<ICommandHandler<CreateOrderCommand>, CreateOrderCommandHandler>();
+                    services.AddTransient<ICommandHandler<PayOrderCommand>, PayOrderCommandHandler>();
+                    services.AddTransient<ICommandHandler<CancelOrderCommand>, CancelOrderCommandHandler>();
 
                     var connectionString = hostContext.Configuration.GetValue<string>("CloudStorageAccountConnectionString");
                     var storageAccount = CloudStorageAccount.Parse(connectionString);
