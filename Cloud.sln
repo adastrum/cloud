@@ -15,7 +15,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cloud.CommandStack", "Cloud
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cloud.Messaging", "Cloud.Messaging\Cloud.Messaging.csproj", "{F4482553-80BC-4360-9E0E-8841EE43D0FA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cloud.WebJobs", "Cloud.WebJobs\Cloud.WebJobs.csproj", "{92B521E1-580E-499B-A3E7-26EB47AB953C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cloud.WebJobs", "Cloud.WebJobs\Cloud.WebJobs.csproj", "{92B521E1-580E-499B-A3E7-26EB47AB953C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cloud.Caching", "Cloud.Caching\Cloud.Caching.csproj", "{57183DFE-FBD2-42A3-A8A9-C7263AA83D9B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{92B521E1-580E-499B-A3E7-26EB47AB953C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{92B521E1-580E-499B-A3E7-26EB47AB953C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{92B521E1-580E-499B-A3E7-26EB47AB953C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57183DFE-FBD2-42A3-A8A9-C7263AA83D9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57183DFE-FBD2-42A3-A8A9-C7263AA83D9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57183DFE-FBD2-42A3-A8A9-C7263AA83D9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57183DFE-FBD2-42A3-A8A9-C7263AA83D9B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

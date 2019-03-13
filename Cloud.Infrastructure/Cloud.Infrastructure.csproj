@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Cloud.Caching\Cloud.Caching.csproj" />
     <ProjectReference Include="..\Cloud.Core\Cloud.Core.csproj" />
     <ProjectReference Include="..\Cloud.Messaging\Cloud.Messaging.csproj" />
   </ItemGroup>
