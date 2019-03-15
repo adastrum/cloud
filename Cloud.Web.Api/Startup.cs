@@ -1,4 +1,5 @@
-﻿using Cloud.Infrastructure;
+﻿using Cloud.Caching;
+using Cloud.Infrastructure;
 using Cloud.Messaging;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -8,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.WindowsAzure.Storage;
 using Swashbuckle.AspNetCore.Swagger;
+using System;
 
 namespace Cloud.Web.Api
 {
@@ -26,6 +28,10 @@ namespace Cloud.Web.Api
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddDbContext<OrderDbContext>(options => options.UseSqlServer(Configuration.GetValue<string>("SqlServerConnectionString")));
             services.AddTransient<ICommandQueueService, CommandQueueService>();
+            services.AddSingleton<ICachingService, InMemoryCachingService>(provider => new InMemoryCachingService(
+                TimeSpan.FromSeconds(1),
+                TimeSpan.FromMinutes(1)
+            ));
 
             var connectionString = Configuration.GetValue<string>("CloudStorageAccountConnectionString");
             var storageAccount = CloudStorageAccount.Parse(connectionString);
