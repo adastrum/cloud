@@ -1,4 +1,6 @@
-﻿using Cloud.CommandStack.Commands;
+﻿using Cloud.Caching;
+using Cloud.CommandStack.Commands;
+using Cloud.Core;
 using Cloud.Infrastructure;
 using Cloud.Messaging;
 using Cloud.Web.Api.Models;
@@ -17,14 +19,17 @@ namespace Cloud.Web.Api.Controllers
     {
         private readonly OrderDbContext _context;
         private readonly ICommandQueueService _commandQueueService;
+        private readonly ICachingService _cachingService;
 
         public OrdersController(
             OrderDbContext context,
-            ICommandQueueService commandQueueService
+            ICommandQueueService commandQueueService,
+            ICachingService cachingService
         )
         {
             _context = context;
             _commandQueueService = commandQueueService;
+            _cachingService = cachingService;
         }
 
         [HttpGet]
@@ -40,6 +45,11 @@ namespace Cloud.Web.Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> FindOne(string id)
         {
+            if (_cachingService.TryGet<Order>(id, out var cached))
+            {
+                return Ok(cached);
+            }
+
             var order = await _context.Orders
                 .AsQueryable()
                 .FirstOrDefaultAsync(x => x.Id == id);
@@ -48,6 +58,8 @@ namespace Cloud.Web.Api.Controllers
             {
                 return NotFound();
             }
+
+            _cachingService.Set(id, order);
 
             return Ok(order);
         }
