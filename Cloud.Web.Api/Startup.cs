@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.WindowsAzure.Storage;
+using StackExchange.Redis;
 using Swashbuckle.AspNetCore.Swagger;
 using System;
 
@@ -28,18 +29,27 @@ namespace Cloud.Web.Api
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddDbContext<OrderDbContext>(options => options.UseSqlServer(Configuration.GetValue<string>("SqlServerConnectionString")));
             services.AddTransient<ICommandQueueService, CommandQueueService>();
-            services.AddSingleton<ICachingService, InMemoryCachingService>(provider => new InMemoryCachingService(
-                TimeSpan.FromSeconds(1),
-                TimeSpan.FromMinutes(1)
-            ));
 
-            var connectionString = Configuration.GetValue<string>("CloudStorageAccountConnectionString");
-            var storageAccount = CloudStorageAccount.Parse(connectionString);
+            var cloudStorageAccountConnectionString = Configuration.GetValue<string>("CloudStorageAccountConnectionString");
+            var storageAccount = CloudStorageAccount.Parse(cloudStorageAccountConnectionString);
 
             services.AddSingleton(storageAccount);
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
+            });
+
+            var lazyConnection = new Lazy<ConnectionMultiplexer>(() =>
+            {
+                var redisConnectionString = Configuration.GetValue<string>("RedisConnectionString");
+                return ConnectionMultiplexer.Connect(redisConnectionString);
+            });
+            var cache = lazyConnection.Value.GetDatabase();
+            services.AddSingleton(cache);
+            services.AddScoped<ICachingService, RedisCachingService>(provider =>
+            {
+                var database = provider.GetService<IDatabase>();
+                return new RedisCachingService(database, TimeSpan.FromMinutes(1));
             });
         }
 
