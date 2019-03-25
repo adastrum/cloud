@@ -21,7 +21,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cloud.Caching", "Cloud.Cach
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cloud.Infrastructure.Tests", "Cloud.Infrastructure.Tests\Cloud.Infrastructure.Tests.csproj", "{692E3FEF-36DE-4FB2-A392-F36209598C0B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cloud.Functions", "Cloud.Functions\Cloud.Functions.csproj", "{40958F64-59F0-44BA-81BB-BE16FB9173A6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cloud.Functions", "Cloud.Functions\Cloud.Functions.csproj", "{40958F64-59F0-44BA-81BB-BE16FB9173A6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cloud.Functions.Tests", "Cloud.Functions.Tests\Cloud.Functions.Tests.csproj", "{8EE80968-DB0E-4339-847F-2606DB330EC9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -69,6 +71,10 @@ Global
 		{40958F64-59F0-44BA-81BB-BE16FB9173A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{40958F64-59F0-44BA-81BB-BE16FB9173A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{40958F64-59F0-44BA-81BB-BE16FB9173A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8EE80968-DB0E-4339-847F-2606DB330EC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8EE80968-DB0E-4339-847F-2606DB330EC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8EE80968-DB0E-4339-847F-2606DB330EC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8EE80968-DB0E-4339-847F-2606DB330EC9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
